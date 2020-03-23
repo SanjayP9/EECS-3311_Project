@@ -35,7 +35,12 @@ feature -- attributes
 
 	ship : SHIP
 
+feature {NONE}
 	planets : ARRAY[ENTITY]
+	benigns : ARRAY[ENTITY]
+	janitaurs : ARRAY[ENTITY]
+	asteroids : ARRAY[ENTITY]
+	malevolents : ARRAY[ENTITY]
 
 feature --constructor
 
@@ -43,14 +48,25 @@ feature --constructor
 		-- creates a dummy of galaxy grid
 		local
 			row, column : INTEGER
-			planet_count : INTEGER
+			movable_id : INTEGER
 		do
+			-- used for test mode
 			create moved_entities.make_empty
 			create dead_entities.make_empty
+
+			-- entity lists			
 			create planets.make_empty
+			create benigns.make_empty
+			create janitaurs.make_empty
+			create asteroids.make_empty
+			create malevolents.make_empty
+
+			-- ship
 			create ship.make(1, 1, 1)
+
+			-- create sectors
 			create grid.make_filled (create {SECTOR}.make_dummy, shared_info.number_rows, shared_info.number_columns)
-			planet_count := 1
+			movable_id := 1
 			from
 				row := 1
 			until
@@ -62,15 +78,15 @@ feature --constructor
 				until
 					column > shared_info.number_columns
 				loop
-					grid[row,column] := create {SECTOR}.make(row,column, ship, planet_count)
+					grid[row,column] := create {SECTOR}.make(row,column, ship, movable_id)
 
 					-- Check how many planets were added
 					across grid[row, column].contents as i
 					loop
 						if attached i.item as quadrant then
 							if quadrant.entity_type.item ~ 'P' then
-								planets.force (quadrant, planet_count)
-								planet_count := planet_count + 1
+								planets.force (quadrant, movable_id)
+								movable_id := movable_id + 1
 							end
 						end
 					end

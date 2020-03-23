@@ -8,10 +8,7 @@ class
 	PLANET
 
 inherit
-	ENTITY
-		redefine
-			movable
-		end
+	MOVABLE_ENTITY
 
 create
 	make
@@ -20,7 +17,6 @@ feature -- attribute
 	is_landed : BOOLEAN
 	timer : INTEGER
 	has_life : BOOLEAN
-	movable : BOOLEAN
 
 feature
 	make (a_row, a_col, a_id, a_quadrant : INTEGER)
@@ -49,16 +45,6 @@ feature -- commands
 	land
 		do
 			is_landed := true
-		end
-
-	override_turns (turns : INTEGER)
-		do
-			timer := turns
-		end
-
-	decrement_turn
-		do
-			timer := timer - 1
 		end
 
 feature {GALAXY} -- queries

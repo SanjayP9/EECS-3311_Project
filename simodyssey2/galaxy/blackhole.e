@@ -23,4 +23,6 @@ feature
 			movable := false
 		end
 
+invariant
+	not_movable : movable ~ false
 end

@@ -27,7 +27,7 @@ feature -- attributes
 	column: INTEGER
 
 feature -- constructor
-	make(row_input: INTEGER; column_input: INTEGER; a_explorer: SHIP; planet_count: INTEGER)
+	make(row_input: INTEGER; column_input: INTEGER; a_explorer: SHIP; movable_id: INTEGER)
 		--initialization
 		require
 			valid_row: (row_input >= 1) and (row_input <= shared_info.number_rows)
@@ -43,7 +43,7 @@ feature -- constructor
 				if (row = 1) and (column = 1) then
 					put (a_explorer) -- If this is the top left corner sector, place the explorer there
 				end
-				populate (planet_count) -- Run the populate command to complete setup
+				populate (movable_id) -- Run the populate command to complete setup
 			end -- if
 		end
 
@@ -55,7 +55,7 @@ feature -- commands
 			contents.compare_objects
 		end
 
-	populate (planet_count : INTEGER)
+	populate (movable_id : INTEGER)
 			-- this feature creates 1 to max_capacity-1 components to be intially stored in the
 			-- sector. The component may be a planet or nothing at all.
 		local
@@ -64,9 +64,9 @@ feature -- commands
 			loop_counter: INTEGER
 			component: ENTITY
 			turn :INTEGER
-			p_count : INTEGER
+			m_id : INTEGER
 		do
-			p_count := planet_count
+			m_id := movable_id
 			number_items := gen.rchoose (1, shared_info.max_capacity-1)  -- MUST decrease max_capacity by 1 to leave space for Explorer (so a max of 3)
 			from
 				loop_counter := 1
@@ -76,11 +76,19 @@ feature -- commands
 				threshold := gen.rchoose (1, 100) -- each iteration, generate a new value to compare against the threshold values provided by `test` or `play`
 
 
-				if threshold < shared_info.planet_threshold then
-					component := create {PLANET}.make(row, column, p_count, loop_counter)
-					p_count := p_count + 1
+				if threshold < shared_info.asteroid_threshold then
+					component := create {ASTEROID}.make (row, column, m_id, loop_counter)
+				elseif threshold < shared_info.janitaur_threshold then
+					component := create {JANITAUR}.make (row, column, m_id, loop_counter)
+				elseif (threshold < shared_info.malevolent_threshold) then
+					component := create {MALEVOLENT}.make (row, column, m_id, loop_counter)
+				elseif (threshold < shared_info.benign_threshold) then
+					component := create {BENIGN}.make (row, column, m_id, loop_counter)
+				elseif threshold < shared_info.planet_threshold then
+					component := create {PLANET}.make(row, column, m_id, loop_counter)
 				end
 
+				m_id := m_id + 1
 
 				if attached component as entity then
 					put (entity) -- add new entity to the contents list
@@ -89,8 +97,8 @@ feature -- commands
 					turn:=gen.rchoose (0, 2) -- Hint: Use this number for assigning turn values to the planet created
 					-- The turn value of the planet created (except explorer) suggests the number of turns left before it can move.
 					--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-					if attached {PLANET} entity as planet then
-						planet.override_turns (turn)
+					if attached {MOVABLE_ENTITY} entity as movable_ent then
+						movable_ent.override_turns (turn)
 					end
 					component := void -- reset component object
 				end
