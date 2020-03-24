@@ -8,18 +8,18 @@ class
 	SHIP
 
 inherit
-	ENTITY
+	MOVABLE_ENTITY
+		export {NONE}
+			override_reproduction,
+			decrement_reproduction,
+			reproduction_turns
+		end
 
 create
 	make
 
 feature -- attributes
-	fuel : INTEGER
-	life : INTEGER
 	is_landed : BOOLEAN
-	max_fuel : INTEGER
-	max_life : INTEGER
-	death_code : INTEGER
 
 feature
 	make (a_row, a_col, a_quadrant : INTEGER)
@@ -39,11 +39,7 @@ feature
 		end
 
 feature -- command
-	perish (perish_type : INTEGER)
-		do
-			death_code := perish_type
-			life := 0
-		end
+
 	land
 		do
 			is_landed := true
@@ -52,20 +48,6 @@ feature -- command
 	liftoff
 		do
 			is_landed := false
-		end
-
-	use_fuel
-		do
-			fuel := fuel - 1
-		end
-
-	refuel (new_fuel : INTEGER)
-		do
-			fuel := fuel + new_fuel
-
-			if fuel > max_fuel then
-				fuel := max_fuel
-			end
 		end
 
 feature --queries
@@ -127,4 +109,8 @@ feature {GALAXY}
 				Result.append ("F")
 			end
 		end
+
+invariant
+	zero_id : id ~ 0
+
 end

@@ -9,6 +9,10 @@ class
 
 inherit
 	MOVABLE_ENTITY
+		export {NONE}
+			fuel, max_fuel,
+			life, max_life
+		end
 
 create
 	make
@@ -25,9 +29,29 @@ feature
 		end
 
 feature -- queries
+	print_death_status : STRING
+		do
+			Result := ""
+			inspect death_code
+			when 1 then
+				Result := "Asteroid got devoured by blackhole (id: -1) at Sector:"
+			when 2 then
+				if attached {ENTITY} killer as e then
+					Result := "Asteroid got imploded by janitaur (id: "
+					Result.append (e.id.out)
+					Result.append (") at Sector:")
+				end
+			end
+
+			Result.append (row.out)
+			Result.append (":")
+			Result.append (col.out)
+		end
+
 	print_description : STRING
 		do
-			Result := "not implemented"
+			Result := "turns_left:"
+			Result.append (turns_left.out)
 		end
 
 end

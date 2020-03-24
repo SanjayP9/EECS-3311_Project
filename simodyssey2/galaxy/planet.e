@@ -9,6 +9,10 @@ class
 
 inherit
 	MOVABLE_ENTITY
+		export {NONE}
+			fuel, max_fuel,
+			life, max_life
+		end
 
 create
 	make
@@ -48,6 +52,11 @@ feature -- commands
 		end
 
 feature {GALAXY} -- queries
+	print_death_status : STRING
+		do
+			Result := "not implemented"
+		end
+
 	print_description : STRING
 		do
 			Result := ""

@@ -86,6 +86,8 @@ feature -- commands
 					component := create {BENIGN}.make (row, column, m_id, loop_counter)
 				elseif threshold < shared_info.planet_threshold then
 					component := create {PLANET}.make(row, column, m_id, loop_counter)
+				else
+					m_id := m_id - 1
 				end
 
 				m_id := m_id + 1
@@ -135,6 +137,16 @@ feature {GALAXY} --command
 		end
 
 feature -- Queries
+	get_attached_contents : ARRAY[ENTITY]
+		do
+			create Result.make_empty
+			across contents as entity loop
+				if attached {ENTITY} entity as ent then
+					Result.force (ent, Result.count + 1)
+				end
+			end
+		end
+
 
 	print_sector: STRING
 			-- Printable version of location's coordinates with different formatting

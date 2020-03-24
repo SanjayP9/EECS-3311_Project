@@ -225,7 +225,7 @@ feature -- model operations
 				end
 
 				if attached g as galaxy then
-					error_code := galaxy.wormhole
+					error_code := galaxy.wormhole (galaxy.ship)
 					update_code := galaxy.update
 
 					if error_code ~ 0 then
