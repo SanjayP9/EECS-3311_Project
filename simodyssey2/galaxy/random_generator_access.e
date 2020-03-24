@@ -10,7 +10,21 @@ expanded class
 	RANDOM_GENERATOR_ACCESS
 
 feature -- Query
+	output : STRING
+		attribute
+			Result := "  "
+		end
 
+	newline : INTEGER
+		attribute
+			Result := 0
+		end
+
+	reset_rng
+		do
+			output := "  "
+			newline := 0
+		end
 
     debug_gen: RANDOM_GENERATOR
             -- deterministic generator for debug mode
@@ -32,6 +46,19 @@ feature -- Query
             gen := gen_access.debug_gen
             Result := gen.num\\(high-low + 1) + low
             gen.forth
+
+			output.append (Result.out)
+			output.append (":[")
+            output.append (low.out)
+            output.append (",")
+            output.append (high.out)
+            output.append ("], ")
+            newline := newline + 1
+
+            if newline ~ 5 then
+            	newline := 0
+            	output.append ("%N  ")
+            end
         end
 
 invariant

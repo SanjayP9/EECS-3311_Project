@@ -85,6 +85,21 @@ feature --queries
 				Result.append (col.out)
 			when 2 then
 				Result := "Explorer got devoured by blackhole (id: -1) at Sector:3:3"
+			when 3 then
+				Result := "Explorer got destroyed by asteroid (id: "
+				if attached killer as k then
+					Result.append (k.id.out)
+					Result.append (") at Sector:")
+					Result.append (row.out)
+					Result.append (":")
+					Result.append (col.out)
+				end
+
+			when 4 then
+				Result := "Explorer got lost in space - out of life support at Sector:"
+				Result.append (row.out)
+				Result.append (":")
+				Result.append (col.out)
 			else
 				Result := ""
 			end

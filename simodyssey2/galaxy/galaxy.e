@@ -19,6 +19,7 @@ feature {NONE}
 	moved_entities : ARRAY[TUPLE[ent : ENTITY; old_loc : COORDINATE; old_quad : INTEGER; new_quad : INTEGER]]
 	reproduced_entities : ARRAY[TUPLE[parent : ENTITY; child : ENTITY]]
 	dead_entities : ARRAY[ENTITY]
+	attacked : ARRAY[ENTITY]
 
 feature -- attributes
 
@@ -55,6 +56,7 @@ feature --constructor
 			create moved_entities.make_empty
 			create dead_entities.make_empty
 			create reproduced_entities.make_empty
+			create attacked.make_empty
 
 			-- entity lists			
 			create planets.make_empty
@@ -223,7 +225,6 @@ feature --commands
 		local
 			temp_row, temp_col : INTEGER
 			added : BOOLEAN
-			index : INTEGER
 		do
 			Result := 0
 			if attached {SHIP} entity as ent then
@@ -265,10 +266,7 @@ feature --commands
 			direction_utility : DIRECTION_UTILITY
 			can_move : BOOLEAN
 			wormhole_int : INTEGER
-			index : INTEGER
-			temp_arr : ARRAY[ENTITY]
-			sorted : ARRAYED_LIST[ENTITY]
-			row, col : INTEGER
+			behave_error_code : INTEGER
 		do
 			Result := 0
 			across grid[ship.row, ship.col].contents as i
@@ -345,13 +343,19 @@ feature --commands
 									end
 								end
 
-								if not attached {ASTEROID} mov_ent and mov_ent.fuel ~ 0 then
+								if not attached {PLANET} mov_ent and
+								   not attached {ASTEROID} mov_ent and mov_ent.fuel ~ 0 then
 									mov_ent.perish (1, void)
 									delete_entity (mov_ent)
 								else
 									reproduce (mov_ent)
 									-- behave
-									Result := behave (mov_ent)
+									behave_error_code := behave (mov_ent)
+
+									if behave_error_code /~ 0 then
+										Result := behave_error_code
+									end
+
 								end
 							end
 						end
@@ -465,15 +469,14 @@ feature --commands
 				across grid[asteroid.row, asteroid.col].contents as ent loop
 					if not attached {PLANET} ent.item and
 					   attached {MOVABLE_ENTITY} ent.item as perished_ent then
-						if perished_ent.id /~ asteroid.id then
+					   	if attached {SHIP} ent.item then
+							ship.perish (3, asteroid)
+							delete_entity(ship)
+							Result := 3
+						elseif perished_ent.id /~ asteroid.id then
 							perished_ent.perish (3, asteroid)
 							delete_entity(perished_ent)
 						end
-
-					elseif attached {SHIP} ent.item then
-						ship.perish (3, asteroid)
-						delete_entity(ship)
-						Result := 3
 					end
 				end
 				asteroid.override_turns (gen.rchoose (0, 2))
@@ -510,20 +513,24 @@ feature --commands
 				from sorted.start
 				until sorted.off
 				loop
-					across grid[benign.row, benign.col].contents as ent loop
-						if attached {MALEVOLENT} ent.item as malevolent then
-							malevolent.perish (4, benign)
-							delete_entity (malevolent)
+					across grid[mov_ent.row, mov_ent.col].contents as ent loop
+						if attached {MALEVOLENT} ent.item as e then
+							if sorted.item.id ~ e.id then
+								e.perish (4, benign)
+								delete_entity (e)
+							end
 						end
 					end
 
 					sorted.forth
 				end
-				benign.override_turns (gen.rchoose (0, 2))
+				mov_ent.override_turns (gen.rchoose (0, 2))
 			elseif attached {MALEVOLENT} mov_ent as malevolent then
 				if grid[malevolent.row, malevolent.col].has_ship and not grid[malevolent.row, malevolent.col].has_benign and
 				   not ship.is_landed then
 					ship.decrement_life
+
+					attacked.force (malevolent, attacked.count + 1)
 
 					if ship.life ~ 0 then
 						ship.perish (4, malevolent)
@@ -778,6 +785,22 @@ feature -- query
 						end
 					end
 					dead_entities := temp_dead
+
+					if attached {MALEVOLENT} i.item.ent as malevolent then
+						across attacked as j loop
+							if j.item.id ~ i.item.ent.id then
+								--attacked [0,E] at [1,1,1]
+								Result.append ("%N      attacked [0,E] at [")
+								Result.append (ship.row.out)
+								Result.append (",")
+								Result.append (ship.col.out)
+								Result.append (",")
+								Result.append (ship.quadrant.out)
+								Result.append ("]")
+							end
+						end
+					end
+
 				end
 			end
 
@@ -896,6 +919,7 @@ feature -- query
 			create dead_entities.make_empty
 			create moved_entities.make_empty
 			create reproduced_entities.make_empty
+			create attacked.make_empty
 		end
 
 	out: STRING

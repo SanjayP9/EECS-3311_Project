@@ -318,6 +318,35 @@ feature -- model operations
 					update_code := galaxy.update
 					curr_state := curr_state + 1
 					curr_sub_state := 0
+
+					if update_code /~ 0 then
+
+						mode_string := " mode:"
+
+						if test_mode then
+							mode_string.append ("test, ok")
+						else
+							mode_string.append ("play, ok")
+						end
+
+						mode_string.append ("%N  ")
+						mode_string.append (galaxy.ship.print_death_status)
+						mode_string.append ("%N  The game has ended. You can start a new game.")
+
+						mode_string.append (galaxy.print_description(test_mode))
+						mode_string.append (galaxy.out)
+
+						if test_mode then
+							mode_string.append ("%N  ")
+							mode_string.append (galaxy.ship.print_death_status)
+							mode_string.append ("%N  The game has ended. You can start a new game.")
+						end
+
+						ingame := false
+						g := void
+					end
+
+
 				end
 			else
 				invalid_command_ingame
@@ -474,6 +503,9 @@ feature -- queries
 				if curr_sub_state < 1 then
 					Result.append (galaxy.print_description(test_mode))
 					Result.append (galaxy.out)
+					--Result.append ("%N")
+					--Result.append (galaxy.gen.output)
+					--galaxy.gen.reset_rng
 				end
 			end
 		end
