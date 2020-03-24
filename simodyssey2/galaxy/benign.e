@@ -25,6 +25,9 @@ feature
 			create entity_type.make ('B')
 			id := a_id
 			movable := true
+			fuel := 3
+			max_fuel := 3
+			reproduction_turns := 1
 		end
 
 feature -- queries

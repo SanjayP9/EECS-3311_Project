@@ -33,9 +33,9 @@ feature -- queries
 		do
 			Result := ""
 			inspect death_code
-			when 1 then
-				Result := "Asteroid got devoured by blackhole (id: -1) at Sector:"
 			when 2 then
+				Result := "Asteroid got devoured by blackhole (id: -1) at Sector:"
+			when 3 then
 				if attached {ENTITY} killer as e then
 					Result := "Asteroid got imploded by janitaur (id: "
 					Result.append (e.id.out)
@@ -51,7 +51,11 @@ feature -- queries
 	print_description : STRING
 		do
 			Result := "turns_left:"
-			Result.append (turns_left.out)
+			if death_code /~ 0 then
+				Result.append ("N/A")
+			else
+				Result.append (turns_left.out)
+			end
 		end
 
 end

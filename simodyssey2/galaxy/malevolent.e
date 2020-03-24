@@ -27,6 +27,7 @@ feature
 			movable := true
 			fuel := 3
 			max_fuel := 3
+			reproduction_turns := 1
 		end
 
 feature -- commands

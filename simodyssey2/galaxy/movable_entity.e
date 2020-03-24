@@ -53,9 +53,13 @@ feature -- commands
 			end
 		end
 
+	decrement_life
+		do
+			life := life - 1
+		end
+
 	perish (a_death_code : INTEGER; entity : detachable ENTITY)
 		do
-			fuel := 0
 			life := 0
 			movable := false
 			death_code := a_death_code

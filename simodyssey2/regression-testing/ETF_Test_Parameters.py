@@ -28,7 +28,7 @@ is_expected = False
 oracle = "./oracle.exe"
 
 # Specify the path of the executable built from your project.
-executable = "~/tmp/student/EIFGENs/simodyssey/W_code/simodyssey"
+executable = "../EIFGENs/simodyssey2/W_code/simodyssey2"
 # The above is an OSX executable
 # Linux executable for students shaler be called: oracle.exe
 

@@ -29,6 +29,7 @@ feature
 			max_fuel := 5
 			load := 0
 			max_load := 2
+			reproduction_turns := 2
 		end
 
 feature -- attributes
@@ -87,7 +88,7 @@ feature -- queries
 			Result.append (max_load.out)
 			Result.append (", actions_left_until_reproduction:")
 			Result.append (reproduction_turns.out)
-			Result.append ("/1, turns_left:")
+			Result.append ("/2, turns_left:")
 
 			if (row ~ 3 and col ~ 3) or not movable then
 				Result.append ("N/A")

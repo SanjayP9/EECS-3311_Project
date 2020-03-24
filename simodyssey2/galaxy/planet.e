@@ -19,7 +19,6 @@ create
 
 feature -- attribute
 	is_landed : BOOLEAN
-	timer : INTEGER
 	has_life : BOOLEAN
 
 feature
@@ -89,7 +88,7 @@ feature {GALAXY} -- queries
 			if (row ~ 3 and col ~ 3) or not movable then
 				Result.append ("N/A")
 			else
-				Result.append (timer.out)
+				Result.append (turns_left.out)
 			end
 		end
 end

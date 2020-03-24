@@ -12,7 +12,8 @@ inherit
 		export {NONE}
 			override_reproduction,
 			decrement_reproduction,
-			reproduction_turns
+			reproduction_turns,
+			turns_left
 		end
 
 create

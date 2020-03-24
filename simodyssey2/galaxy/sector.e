@@ -94,6 +94,7 @@ feature -- commands
 
 				if attached component as entity then
 					put (entity) -- add new entity to the contents list
+					component.overwrite_quadrant (contents.count)
 
 					--@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 					turn:=gen.rchoose (0, 2) -- Hint: Use this number for assigning turn values to the planet created
@@ -141,7 +142,7 @@ feature -- Queries
 		do
 			create Result.make_empty
 			across contents as entity loop
-				if attached {ENTITY} entity as ent then
+				if attached {ENTITY} entity.item as ent then
 					Result.force (ent, Result.count + 1)
 				end
 			end
@@ -225,7 +226,7 @@ feature -- Queries
 
 	has_planet : BOOLEAN
 		do
-			Result := contents.has (create {PLANET}.make (0, 0, 0, 0))
+			Result := contents.has (create {PLANET}.make (0, 0, 1, 0))
 		end
 
 	has_star : BOOLEAN
@@ -235,12 +236,12 @@ feature -- Queries
 
 	has_yellow_dwarf : BOOLEAN
 		do
-			Result := contents.has (create {STAR}.make_yellow_dwarf (0, 0, 0))
+			Result := contents.has (create {STAR}.make_yellow_dwarf (0, 0, -2))
 		end
 
 	has_blue_giant : BOOLEAN
 		do
-			Result := contents.has (create {STAR}.make_blue_giant (0, 0, 0))
+			Result := contents.has (create {STAR}.make_blue_giant (0, 0, -2))
 		end
 
 	has_explorer : BOOLEAN
@@ -250,12 +251,35 @@ feature -- Queries
 
 	has_wormhole : BOOLEAN
 		do
-			Result := contents.has (create {WORMHOLE}.make (0, 0, 0))
+			Result := contents.has (create {WORMHOLE}.make (0, 0, -2))
 		end
 
 	has_blackhole : BOOLEAN
 		do
 			Result := contents.has (create {BLACKHOLE}.make (0, 0))
 		end
+
+	has_ship : BOOLEAN
+		do
+			Result := contents.has (create {SHIP}.make (0, 0, 0))
+		end
+
+	has_benign : BOOLEAN
+		do
+			Result := contents.has (create {BENIGN}.make (0, 0, 0, 0))
+		end
+
+	has_malevolent : BOOLEAN
+		do
+			Result := contents.has (create {MALEVOLENT}.make (0, 0, 2, 0))
+		end
+
+	has_asteroid : BOOLEAN
+		do
+			Result := contents.has (create {ASTEROID}.make (0, 0, 2, 0))
+		end
+
+invariant
+	max_contents : contents.count <= shared_info.max_capacity
 
 end

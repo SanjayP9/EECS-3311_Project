@@ -99,7 +99,7 @@ feature -- model operations
 				ingame := false
 
 				curr_sub_state := curr_sub_state + 1
-				mode_string := " ok%N  Mission aborted. Try test(30)"
+				mode_string := " ok%N  Mission aborted. Try test(3,5,7,15,30)"
 			else
 				invalid_command_ingame
 			end
@@ -266,32 +266,7 @@ feature -- model operations
 							galaxy.ship.use_fuel
 							update_code := galaxy.update
 
-							inspect update_code
-							when 1 then
-								mode_string := " mode:"
-
-								if test_mode then
-									mode_string.append ("test, ok")
-								else
-									mode_string.append ("play, ok")
-								end
-
-								mode_string.append ("%N  ")
-								mode_string.append (galaxy.ship.print_death_status)
-								mode_string.append ("%N  The game has ended. You can start a new game.")
-
-								mode_string.append (galaxy.print_description(test_mode))
-								mode_string.append (galaxy.out)
-
-								if test_mode then
-									mode_string.append ("%N  ")
-									mode_string.append (galaxy.ship.print_death_status)
-									mode_string.append ("%N  The game has ended. You can start a new game.")
-								end
-
-								ingame := false
-								g := void
-							when 2 then
+							if update_code /~ 0 then
 								mode_string := " mode:"
 
 								if test_mode then
@@ -318,7 +293,6 @@ feature -- model operations
 							else
 								mode_string.append (", ok")
 							end
-
 
 						else
 							invalid_command_move(3)

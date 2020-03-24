@@ -17,6 +17,7 @@ create
 
 feature {NONE}
 	moved_entities : ARRAY[TUPLE[ent : ENTITY; old_loc : COORDINATE; old_quad : INTEGER; new_quad : INTEGER]]
+	reproduced_entities : ARRAY[TUPLE[parent : ENTITY; child : ENTITY]]
 	dead_entities : ARRAY[ENTITY]
 
 feature -- attributes
@@ -53,6 +54,7 @@ feature --constructor
 			-- used for test mode
 			create moved_entities.make_empty
 			create dead_entities.make_empty
+			create reproduced_entities.make_empty
 
 			-- entity lists			
 			create planets.make_empty
@@ -85,15 +87,21 @@ feature --constructor
 					loop
 						if attached i.item as quadrant then
 							if quadrant.entity_type.item ~ 'P' then
-								planets.force (quadrant, movable_id)
+								planets.force (quadrant, planets.count + 1)
+								movable_id := movable_id + 1
 							elseif quadrant.entity_type.item ~ 'B' then
-								benigns.force (quadrant, movable_id)
+								benigns.force (quadrant, benigns.count + 1)
+								movable_id := movable_id + 1
 							elseif quadrant.entity_type.item ~ 'M' then
-								malevolents.force (quadrant, movable_id)
+								malevolents.force (quadrant, malevolents.count + 1)
+								movable_id := movable_id + 1
 							elseif quadrant.entity_type.item ~ 'J' then
-								janitaurs.force (quadrant, movable_id)
+								janitaurs.force (quadrant, janitaurs.count + 1)
+								movable_id := movable_id + 1
+							elseif quadrant.entity_type.item ~ 'A' then
+								asteroids.force (quadrant, asteroids.count + 1)
+								movable_id := movable_id + 1
 							end
-							movable_id := movable_id + 1
 						end
 					end
 
@@ -215,6 +223,7 @@ feature --commands
 		local
 			temp_row, temp_col : INTEGER
 			added : BOOLEAN
+			index : INTEGER
 		do
 			Result := 0
 			if attached {SHIP} entity as ent then
@@ -242,11 +251,7 @@ feature --commands
 				loop
 					temp_row := gen.rchoose (1, 5)
 					temp_col := gen.rchoose (1, 5)
-					if temp_row ~ entity.row and temp_col ~ entity.col then
-						added := true
-					else
-						added := move (entity, [temp_row, temp_col])
-					end
+					added := move (entity, [temp_row, temp_col])
 				end
 			end
 		end
@@ -263,6 +268,7 @@ feature --commands
 			index : INTEGER
 			temp_arr : ARRAY[ENTITY]
 			sorted : ARRAYED_LIST[ENTITY]
+			row, col : INTEGER
 		do
 			Result := 0
 			across grid[ship.row, ship.col].contents as i
@@ -290,18 +296,20 @@ feature --commands
 				sorted_entities.off
 			loop
 				if attached {MOVABLE_ENTITY} sorted_entities.item as mov_ent then
-					if mov_ent.turns_left ~ 0 then
-						if attached {PLANET} mov_ent as planet then
-							if grid[planet.row, planet.col].has_star then
-								planet.attach_to_star
-								planet.decrement_turn
+					if mov_ent.death_code /~ 0 then
+						sorted_entities.remove
+						sorted_entities.back
+					elseif mov_ent.id /~ 0 and mov_ent.turns_left ~ 0 then
+						if attached {PLANET} mov_ent as planet and
+							grid[mov_ent.row, mov_ent.col].has_star then
+							planet.attach_to_star
+							planet.decrement_turn
 
-								if grid[planet.row, planet.col].has_yellow_dwarf then
-									num := gen.rchoose (1, 2)
+							if grid[planet.row, planet.col].has_yellow_dwarf then
+								num := gen.rchoose (1, 2)
 
-									if num = 2 then
-										planet.support_life
-									end
+								if num = 2 then
+									planet.support_life
 								end
 							end
 						else
@@ -314,172 +322,233 @@ feature --commands
 								new_coord := direction_utility.convert_bounds (mov_ent.row + new_coord.row, mov_ent.col + new_coord.col)
 
 								can_move := move (mov_ent, new_coord)
+
+								if can_move then
+									mov_ent.use_fuel
+								end
 							end
 
 							-- check
 							if grid[mov_ent.row, mov_ent.col].has_blackhole then
+								mov_ent.perish (2, void)
 								delete_entity(mov_ent)
 								sorted_entities.remove
 								sorted_entities.back
 							else
-								-- reproduce
-								if attached {MALEVOLENT} mov_ent or attached {BENIGN} mov_ent or attached {JANITAUR} mov_ent then
-									if not grid[mov_ent.row, mov_ent.col].is_full and mov_ent.reproduction_turns ~ 0 then
-										from
-											index := 1
-										until index > shared_info.max_capacity
-										loop
-											if not grid[mov_ent.row, mov_ent.col].contents.valid_index (index) or
-										       not attached grid[mov_ent.row, mov_ent.col].contents[index] then
-												grid[mov_ent.row, mov_ent.col].contents.go_i_th (index)
-												if attached {MALEVOLENT} mov_ent as malevolent then
-													grid[mov_ent.row, mov_ent.col].contents.force (create {MALEVOLENT}.make (mov_ent.row, mov_ent.col, movable_id, index))
-													malevolent.override_reproduction (1)
-												elseif attached {JANITAUR} mov_ent as janitaur then
-													grid[mov_ent.row, mov_ent.col].contents.force (create {JANITAUR}.make (mov_ent.row, mov_ent.col, movable_id, index))
-													janitaur.override_reproduction (2)
-												elseif attached {BENIGN} mov_ent as benign then
-													grid[mov_ent.row, mov_ent.col].contents.force (create {BENIGN}.make (mov_ent.row, mov_ent.col, movable_id, index))
-													benign.override_reproduction (1)
-												end
-
-												movable_id := movable_id + 1
-
-												if attached {MOVABLE_ENTITY} grid[mov_ent.row, mov_ent.col].contents[index] as ent then
-													ent.override_turns (gen.rchoose (0, 2))
-												end
-
-												index := shared_info.max_capacity
-											end
-											index := index + 1
+								-- refueling
+								if attached {MALEVOLENT} mov_ent or attached {BENIGN} mov_ent or
+								   attached {JANITAUR} mov_ent and grid[mov_ent.row, mov_ent.col].has_star then
+									across grid[mov_ent.row, mov_ent.col].contents as i loop
+										if attached {STAR} i.item as star then
+											mov_ent.refuel (star.luminosity)
 										end
-									elseif mov_ent.reproduction_turns /~ 0 then
-										mov_ent.decrement_reproduction
 									end
 								end
 
-
-								if attached {ASTEROID} mov_ent then
-									across grid[mov_ent.row, mov_ent.col].contents as ent loop
-										if attached {MALEVOLENT} ent or attached {BENIGN} ent or attached {JANITAUR} ent or attached {SHIP} ent then
-											-- ADD PERISH CODE FOR ASTEROIDS
-										end
-									end
-								elseif attached {JANITAUR} mov_ent as janitaur then
-									create sorted.make (0)
-									sorted := get_sorted(grid[mov_ent.row, mov_ent.col].get_attached_contents)
-
-									from sorted.start
-									until sorted.off
-									loop
-										across grid[mov_ent.row, mov_ent.col].contents as ent loop
-											if attached {ASTEROID} ent as e then
-												if sorted.item.id ~ e.id and not janitaur.at_max_capacity then
-													-- perish
-													janitaur.add_load
-												end
-											end
-										end
-
-										sorted.forth
-									end
-
-									if grid[mov_ent.row, mov_ent.col].has_wormhole then
-										janitaur.clear_load
-									end
-
-									janitaur.override_turns (gen.rchoose (0, 2))
-
-								elseif attached {BENIGN} mov_ent then
-									create sorted.make (0)
-									sorted := get_sorted(grid[mov_ent.row, mov_ent.col].get_attached_contents)
-
-									from sorted.start
-									until sorted.off
-									loop
-										across grid[mov_ent.row, mov_ent.col].contents as ent loop
-											if attached {MALEVOLENT} ent then
-												-- perish
-											end
-										end
-									end
-
+								if not attached {ASTEROID} mov_ent and mov_ent.fuel ~ 0 then
+									mov_ent.perish (1, void)
+									delete_entity (mov_ent)
+								else
+									reproduce (mov_ent)
+									-- behave
+									Result := behave (mov_ent)
 								end
-								-- behave
---								if grid[planet.row, planet.col].has_star then
---									planet.attach_to_star
---									planet.decrement_turn
-
---									if grid[planet.row, planet.col].has_yellow_dwarf then
---										num := gen.rchoose (1, 2)
-
---										if num = 2 then
---											planet.support_life
---										end
---									end
---								else
---									planet.override_turns (gen.rchoose (0, 2))
---								end
 							end
-
 						end
+					else
+						mov_ent.decrement_turn
 					end
 				end
-
---				if attached {PLANET} sorted_entities.item as planet then
---					if planet.timer = 0 then
---						if grid[planet.row, planet.col].has_star then
---							planet.attach_to_star
---							planet.decrement_turn
-
---							if grid[planet.row, planet.col].has_yellow_dwarf then
---								num := gen.rchoose (1, 2)
-
---								if num = 2 then
---									planet.support_life
---								end
---							end
---						else
---							new_planet_coord := direction_utility.num_dir (gen.rchoose (1, 8))
---							new_planet_coord := direction_utility.convert_bounds (planet.row + new_planet_coord.row, planet.col + new_planet_coord.col)
-
---							-- movement
---							can_move := move (planet, new_planet_coord)
-
---							-- check
---							if grid[planet.row, planet.col].has_blackhole then
---								delete_entity(planet)
---								sorted_entities.remove
---								sorted_entities.back
---							else
---								-- behave
---								if grid[planet.row, planet.col].has_star then
---									planet.attach_to_star
---									planet.decrement_turn
-
---									if grid[planet.row, planet.col].has_yellow_dwarf then
---										num := gen.rchoose (1, 2)
-
---										if num = 2 then
---											planet.support_life
---										end
---									end
---								else
---									planet.override_turns (gen.rchoose (0, 2))
---								end
---							end
-
---						end
---					else
---						planet.decrement_turn
---					end
---				end
 
 				sorted_entities.forth
 			end
 
-			-- delete later
-			planets := sorted_entities.to_array
+			-- fix quadrants
+--			from row := 1
+--			until row > shared_info.number_rows
+--			loop
+--				from col := 1
+--				until col > shared_info.number_columns
+--				loop
+--					from index := 1
+--					until index > shared_info.max_capacity
+--					loop
+--						if grid[row, col].contents.valid_index (index) then
+--							if attached grid[row, col].contents[index] as quadrant then
+--								quadrant.overwrite_quadrant (index)
+--							end
+--						end
+--						index := index + 1
+--					end
+
+--					col := col + 1
+--				end
+--				row := row + 1
+--			end
+		end
+
+	reproduce (mov_ent : MOVABLE_ENTITY)
+		local
+			index : INTEGER
+		do
+			-- reproduce
+			if attached {MALEVOLENT} mov_ent or attached {BENIGN} mov_ent or attached {JANITAUR} mov_ent then
+				if not grid[mov_ent.row, mov_ent.col].is_full and mov_ent.reproduction_turns ~ 0 then
+					from
+						index := 1
+					until index > shared_info.max_capacity
+					loop
+						if not grid[mov_ent.row, mov_ent.col].contents.valid_index (index) then
+							grid[mov_ent.row, mov_ent.col].contents.go_i_th (index)
+							if attached {MALEVOLENT} mov_ent as malevolent then
+								grid[mov_ent.row, mov_ent.col].contents.force (create {MALEVOLENT}.make (mov_ent.row, mov_ent.col, movable_id, index))
+								malevolent.override_reproduction (1)
+							elseif attached {JANITAUR} mov_ent as janitaur then
+								grid[mov_ent.row, mov_ent.col].contents.force (create {JANITAUR}.make (mov_ent.row, mov_ent.col, movable_id, index))
+								janitaur.override_reproduction (2)
+							elseif attached {BENIGN} mov_ent as benign then
+								grid[mov_ent.row, mov_ent.col].contents.force (create {BENIGN}.make (mov_ent.row, mov_ent.col, movable_id, index))
+								benign.override_reproduction (1)
+							end
+
+							if attached grid[mov_ent.row, mov_ent.col].contents[index] as child then
+								reproduced_entities.force ([mov_ent, child], reproduced_entities.count + 1)
+							end
+
+							movable_id := movable_id + 1
+
+							if attached {MOVABLE_ENTITY} grid[mov_ent.row, mov_ent.col].contents[index] as ent then
+								ent.override_turns (gen.rchoose (0, 2))
+							end
+
+							index := shared_info.max_capacity
+						elseif not attached grid[mov_ent.row, mov_ent.col].contents[index] then
+							grid[mov_ent.row, mov_ent.col].contents.go_i_th (index)
+							if attached {MALEVOLENT} mov_ent as malevolent then
+								grid[mov_ent.row, mov_ent.col].contents.replace (create {MALEVOLENT}.make (mov_ent.row, mov_ent.col, movable_id, index))
+								malevolent.override_reproduction (1)
+							elseif attached {JANITAUR} mov_ent as janitaur then
+								grid[mov_ent.row, mov_ent.col].contents.replace (create {JANITAUR}.make (mov_ent.row, mov_ent.col, movable_id, index))
+								janitaur.override_reproduction (2)
+							elseif attached {BENIGN} mov_ent as benign then
+								grid[mov_ent.row, mov_ent.col].contents.replace (create {BENIGN}.make (mov_ent.row, mov_ent.col, movable_id, index))
+								benign.override_reproduction (1)
+							end
+
+							if attached grid[mov_ent.row, mov_ent.col].contents[index] as child then
+								reproduced_entities.force ([mov_ent, child], reproduced_entities.count + 1)
+							end
+
+							movable_id := movable_id + 1
+
+							if attached {MOVABLE_ENTITY} grid[mov_ent.row, mov_ent.col].contents[index] as ent then
+								ent.override_turns (gen.rchoose (0, 2))
+							end
+
+							index := shared_info.max_capacity
+						end
+						index := index + 1
+					end
+				elseif mov_ent.reproduction_turns /~ 0 then
+					mov_ent.decrement_reproduction
+				end
+			end
+
+		end
+
+	behave (mov_ent : MOVABLE_ENTITY) : INTEGER
+		local
+			sorted : ARRAYED_LIST[ENTITY]
+			num : INTEGER
+		do
+			if attached {ASTEROID} mov_ent as asteroid then
+				across grid[asteroid.row, asteroid.col].contents as ent loop
+					if not attached {PLANET} ent.item and
+					   attached {MOVABLE_ENTITY} ent.item as perished_ent then
+						if perished_ent.id /~ asteroid.id then
+							perished_ent.perish (3, asteroid)
+							delete_entity(perished_ent)
+						end
+
+					elseif attached {SHIP} ent.item then
+						ship.perish (3, asteroid)
+						delete_entity(ship)
+						Result := 3
+					end
+				end
+				asteroid.override_turns (gen.rchoose (0, 2))
+
+			elseif attached {JANITAUR} mov_ent as janitaur then
+				create sorted.make (0)
+				sorted := get_sorted(grid[mov_ent.row, mov_ent.col].get_attached_contents)
+
+				from sorted.start
+				until sorted.off
+				loop
+					across grid[mov_ent.row, mov_ent.col].contents as ent loop
+						if attached {ASTEROID} ent.item as e then
+							if sorted.item.id ~ e.id and not janitaur.at_max_capacity then
+								e.perish (3, janitaur)
+								delete_entity(e)
+								janitaur.add_load
+							end
+						end
+					end
+
+					sorted.forth
+				end
+
+				if grid[mov_ent.row, mov_ent.col].has_wormhole then
+					janitaur.clear_load
+				end
+
+				janitaur.override_turns (gen.rchoose (0, 2))
+			elseif attached {BENIGN} mov_ent as benign then
+				create sorted.make (0)
+				sorted := get_sorted(grid[benign.row, benign.col].get_attached_contents)
+
+				from sorted.start
+				until sorted.off
+				loop
+					across grid[benign.row, benign.col].contents as ent loop
+						if attached {MALEVOLENT} ent.item as malevolent then
+							malevolent.perish (4, benign)
+							delete_entity (malevolent)
+						end
+					end
+
+					sorted.forth
+				end
+				benign.override_turns (gen.rchoose (0, 2))
+			elseif attached {MALEVOLENT} mov_ent as malevolent then
+				if grid[malevolent.row, malevolent.col].has_ship and not grid[malevolent.row, malevolent.col].has_benign and
+				   not ship.is_landed then
+					ship.decrement_life
+
+					if ship.life ~ 0 then
+						ship.perish (4, malevolent)
+						delete_entity(ship)
+						Result := 4
+					end
+
+				end
+				malevolent.override_turns (gen.rchoose (0, 2))
+			elseif attached {PLANET} mov_ent as planet then
+				if grid[planet.row, planet.col].has_star then
+					planet.attach_to_star
+					planet.decrement_turn
+
+					if grid[planet.row, planet.col].has_yellow_dwarf then
+						num := gen.rchoose (1, 2)
+
+						if num = 2 then
+							planet.support_life
+						end
+					end
+				else
+					planet.override_turns (gen.rchoose (0, 2))
+				end
+			end
 		end
 
 	delete_entity (entity : ENTITY)
@@ -578,6 +647,31 @@ feature -- query
 			end
 		end
 
+	get_reproduced_sorted (array : ARRAY[TUPLE[parent : ENTITY; child : ENTITY]]) :
+		ARRAYED_LIST[TUPLE[parent : ENTITY; child : ENTITY]]
+		local
+			i, j : INTEGER
+		do
+			create Result.make_from_array(array)
+
+			from i := 0
+			until i > array.count
+			loop
+				from j := 1
+				until j > array.count - 1
+				loop
+					if i /~ j then
+						if Result[j].child.id > Result[j + 1].child.id then
+							Result.go_i_th(j)
+							Result.swap(j + 1)
+						end
+					end
+					j := j + 1
+				end
+				i := i + 1
+			end
+		end
+
 	is_valid_landing : TUPLE[error_code : INTEGER; planet : detachable PLANET]
 		do
 			Result := [-1, void]
@@ -611,6 +705,7 @@ feature -- query
 		local
 			sorted_moved_ents : ARRAYED_LIST[TUPLE[ent : ENTITY; old_loc : COORDINATE; old_quad : INTEGER; new_quad : INTEGER]]
 			sorted_ents : ARRAYED_LIST[ENTITY]
+			temp_dead : ARRAY[ENTITY]
 			row, col : INTEGER
 		do
 			create Result.make_empty
@@ -638,7 +733,8 @@ feature -- query
 					Result.append ("]")
 
 					if i.item.ent.row /~ i.item.old_loc.row or
-					   i.item.ent.col /~ i.item.old_loc.col then
+					   i.item.ent.col /~ i.item.old_loc.col or
+					   i.item.ent.quadrant /~ i.item.old_quad then
 					   	Result.append ("->[")
 						Result.append (i.item.ent.row.out)
 						Result.append (",")
@@ -648,6 +744,40 @@ feature -- query
 						Result.append("]")
 					end
 
+					reproduced_entities := get_reproduced_sorted (reproduced_entities).to_array
+					across reproduced_entities as j loop
+						if j.item.parent.id ~ i.item.ent.id then
+							Result.append ("%N      reproduced [")
+							Result.append (j.item.child.full_out)
+							Result.append ("] at [")
+							Result.append (j.item.child.row.out)
+							Result.append (",")
+							Result.append (j.item.child.col.out)
+							Result.append (",")
+							Result.append (j.item.child.quadrant.out)
+							Result.append ("]")
+						end
+					end
+
+					temp_dead := dead_entities.deep_twin
+					across get_sorted (dead_entities).to_array as j loop
+						if attached {MOVABLE_ENTITY} j.item as ent then
+							if attached {ENTITY} ent.killer as killer then
+								if killer.id ~ i.item.ent.id then
+									Result.append ("%N      destroyed [")
+									Result.append (ent.full_out)
+									Result.append ("] at [")
+									Result.append (ent.row.out)
+									Result.append (",")
+									Result.append (ent.col.out)
+									Result.append (",")
+									Result.append (ent.quadrant.out)
+									Result.append ("]")
+								end
+							end
+						end
+					end
+					dead_entities := temp_dead
 				end
 			end
 
@@ -697,8 +827,8 @@ feature -- query
 						if attached {STAR} i.item as st then
 							Result.append ("Luminosity:")
 							Result.append (st.luminosity.out)
-						elseif attached {PLANET} i.item as pl then
-							Result.append (pl.print_description)
+						elseif attached {MOVABLE_ENTITY} i.item as mov_ent then
+							Result.append (mov_ent.print_description)
 						end
 					end
 				end
@@ -726,6 +856,38 @@ feature -- query
 							Result.append (",")
 							Result.append ("%N      ")
 							Result.append (sh.print_death_status)
+						elseif attached {MALEVOLENT} i.item as ml then
+							Result.append ("[")
+							Result.append (ml.full_out)
+							Result.append ("]->")
+							Result.append (ml.print_description)
+							Result.append (",")
+							Result.append ("%N      ")
+							Result.append (ml.print_death_status)
+						elseif attached {ASTEROID} i.item as ast then
+							Result.append ("[")
+							Result.append (ast.full_out)
+							Result.append ("]->")
+							Result.append (ast.print_description)
+							Result.append (",")
+							Result.append ("%N      ")
+							Result.append (ast.print_death_status)
+						elseif attached {JANITAUR} i.item as jn then
+							Result.append ("[")
+							Result.append (jn.full_out)
+							Result.append ("]->")
+							Result.append (jn.print_description)
+							Result.append (",")
+							Result.append ("%N      ")
+							Result.append (jn.print_death_status)
+						elseif attached {BENIGN} i.item as bn then
+							Result.append ("[")
+							Result.append (bn.full_out)
+							Result.append ("]->")
+							Result.append (bn.print_description)
+							Result.append (",")
+							Result.append ("%N      ")
+							Result.append (bn.print_death_status)
 						end
 					end
 				end
@@ -733,6 +895,7 @@ feature -- query
 
 			create dead_entities.make_empty
 			create moved_entities.make_empty
+			create reproduced_entities.make_empty
 		end
 
 	out: STRING
