@@ -252,7 +252,10 @@ feature --commands
 				loop
 					temp_row := gen.rchoose (1, 5)
 					temp_col := gen.rchoose (1, 5)
-					added := move (entity, [temp_row, temp_col])
+
+					if not grid[temp_row, temp_col].is_full then
+						added := move (entity, [temp_row, temp_col])
+					end
 				end
 			end
 		end
@@ -770,7 +773,7 @@ feature -- query
 					across get_sorted (dead_entities).to_array as j loop
 						if attached {MOVABLE_ENTITY} j.item as ent then
 							if attached {ENTITY} ent.killer as killer then
-								if killer.id ~ i.item.ent.id then
+								if killer.id ~ i.item.ent.id and ent.id /~ 0 then
 									Result.append ("%N      destroyed [")
 									Result.append (ent.full_out)
 									Result.append ("] at [")

@@ -61,7 +61,7 @@ feature {GALAXY} -- queries
 			Result := ""
 			Result.append ("attached?:")
 
-			if movable then
+			if movable or death_code /~ 0 then
 				Result.append ("F")
 			else
 				Result.append ("T")
