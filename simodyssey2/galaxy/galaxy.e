@@ -470,8 +470,8 @@ feature --commands
 		do
 			if attached {ASTEROID} mov_ent as asteroid then
 				across grid[asteroid.row, asteroid.col].contents as ent loop
-					if not attached {PLANET} ent.item and
-					   attached {MOVABLE_ENTITY} ent.item as perished_ent then
+					if not attached {PLANET} ent.item and not attached {ASTEROID} ent.item and
+						 attached {MOVABLE_ENTITY} ent.item as perished_ent then
 					   	if attached {SHIP} ent.item then
 							ship.perish (3, asteroid)
 							delete_entity(ship)
@@ -773,7 +773,7 @@ feature -- query
 					across get_sorted (dead_entities).to_array as j loop
 						if attached {MOVABLE_ENTITY} j.item as ent then
 							if attached {ENTITY} ent.killer as killer then
-								if killer.id ~ i.item.ent.id and ent.id /~ 0 then
+								if killer.id ~ i.item.ent.id and (ent.id /~ 0 or killer.entity_type.item ~ 'A')  then
 									Result.append ("%N      destroyed [")
 									Result.append (ent.full_out)
 									Result.append ("] at [")

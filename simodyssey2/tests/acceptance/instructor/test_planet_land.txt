@@ -1,4 +1,4 @@
-play
+test(3,5,7,15,30)
 move(E)
 move(E)
 move(S)

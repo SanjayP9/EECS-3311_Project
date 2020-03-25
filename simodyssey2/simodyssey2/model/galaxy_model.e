@@ -56,8 +56,7 @@ feature -- model operations
 		do
 			if not ingame then
 				-- threshold check
-				if a_threshold < j_threshold and j_threshold < m_threshold and m_threshold < b_threshold and
-				   b_threshold < p_threshold  then
+				if a_threshold <= j_threshold and j_threshold <= m_threshold and m_threshold <= b_threshold and b_threshold <= p_threshold  then
 					if is_test then
 						mode_string := "test"
 					else
@@ -76,8 +75,8 @@ feature -- model operations
 
 					test_mode := is_test
 				else
-					-- TODO:
-					-- err: "Thresholds should be non-decreasing order."
+					curr_sub_state := curr_sub_state + 1
+					mode_string := (" error%N  Thresholds should be non-decreasing order.")
 				end
 			else
 				if test_mode then
@@ -226,11 +225,11 @@ feature -- model operations
 
 				if attached g as galaxy then
 					error_code := galaxy.wormhole (galaxy.ship)
-					update_code := galaxy.update
 
 					if error_code ~ 0 then
 						curr_state := curr_state + 1
 						curr_sub_state := 0
+						update_code := galaxy.update
 
 						mode_string.append (", ok")
 					else
