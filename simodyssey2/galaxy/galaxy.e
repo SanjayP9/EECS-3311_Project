@@ -329,37 +329,34 @@ feature --commands
 								end
 							end
 
-							-- check
-							if grid[mov_ent.row, mov_ent.col].has_blackhole then
+							-- refueling
+							if attached {MALEVOLENT} mov_ent or attached {BENIGN} mov_ent or
+							   attached {JANITAUR} mov_ent and grid[mov_ent.row, mov_ent.col].has_star then
+								across grid[mov_ent.row, mov_ent.col].contents as i loop
+									if attached {STAR} i.item as star then
+										mov_ent.refuel (star.luminosity)
+									end
+								end
+							end
+
+							if not attached {PLANET} mov_ent and
+							   not attached {ASTEROID} mov_ent and mov_ent.fuel ~ 0 then
+								mov_ent.perish (1, void)
+								delete_entity (mov_ent)
+							elseif grid[mov_ent.row, mov_ent.col].has_blackhole then -- check
 								mov_ent.perish (2, void)
 								delete_entity(mov_ent)
 								sorted_entities.remove
 								sorted_entities.back
 							else
-								-- refueling
-								if attached {MALEVOLENT} mov_ent or attached {BENIGN} mov_ent or
-								   attached {JANITAUR} mov_ent and grid[mov_ent.row, mov_ent.col].has_star then
-									across grid[mov_ent.row, mov_ent.col].contents as i loop
-										if attached {STAR} i.item as star then
-											mov_ent.refuel (star.luminosity)
-										end
-									end
+								reproduce (mov_ent)
+								-- behave
+								behave_error_code := behave (mov_ent)
+
+								if behave_error_code /~ 0 then
+									Result := behave_error_code
 								end
 
-								if not attached {PLANET} mov_ent and
-								   not attached {ASTEROID} mov_ent and mov_ent.fuel ~ 0 then
-									mov_ent.perish (1, void)
-									delete_entity (mov_ent)
-								else
-									reproduce (mov_ent)
-									-- behave
-									behave_error_code := behave (mov_ent)
-
-									if behave_error_code /~ 0 then
-										Result := behave_error_code
-									end
-
-								end
 							end
 						end
 					else
@@ -369,29 +366,6 @@ feature --commands
 
 				sorted_entities.forth
 			end
-
-			-- fix quadrants
---			from row := 1
---			until row > shared_info.number_rows
---			loop
---				from col := 1
---				until col > shared_info.number_columns
---				loop
---					from index := 1
---					until index > shared_info.max_capacity
---					loop
---						if grid[row, col].contents.valid_index (index) then
---							if attached grid[row, col].contents[index] as quadrant then
---								quadrant.overwrite_quadrant (index)
---							end
---						end
---						index := index + 1
---					end
-
---					col := col + 1
---				end
---				row := row + 1
---			end
 		end
 
 	reproduce (mov_ent : MOVABLE_ENTITY)

@@ -1557,7 +1557,7 @@
     [34,J]->fuel:3/5, load:0/2, actions_left_until_reproduction:2/2, turns_left:N/A,
       Janitaur got devoured by blackhole (id: -1) at Sector:3:3
     [49,J]->fuel:0/5, load:0/2, actions_left_until_reproduction:2/2, turns_left:N/A,
-      Janitaur got devoured by blackhole (id: -1) at Sector:3:3
+      Janitaur got lost in space - out of fuel at Sector:3:3
     [70,J]->fuel:4/5, load:0/2, actions_left_until_reproduction:1/2, turns_left:N/A,
       Janitaur got devoured by blackhole (id: -1) at Sector:3:3
     [72,J]->fuel:4/5, load:0/2, actions_left_until_reproduction:2/2, turns_left:N/A,
