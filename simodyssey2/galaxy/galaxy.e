@@ -547,6 +547,8 @@ feature --commands
 					end
 				end
 			end
+		ensure
+			removed_entity: across grid[entity.row, entity.col].contents as i all i.item.id /~ entity.id end
 		end
 
 feature -- query
@@ -604,6 +606,8 @@ feature -- query
 				end
 				i := i + 1
 			end
+		ensure
+			array_size_check: array.count ~ Result.count
 		end
 
 	get_movement_sorted (array : ARRAY[TUPLE[ent : ENTITY; old_loc : COORDINATE; old_quad : INTEGER; new_quad : INTEGER]]) :
@@ -629,6 +633,8 @@ feature -- query
 				end
 				i := i + 1
 			end
+		ensure
+			array_size_check: array.count ~ Result.count
 		end
 
 	get_reproduced_sorted (array : ARRAY[TUPLE[parent : ENTITY; child : ENTITY]]) :
@@ -654,6 +660,8 @@ feature -- query
 				end
 				i := i + 1
 			end
+		ensure
+			array_size_check: array.count ~ Result.count
 		end
 
 	is_valid_landing : TUPLE[error_code : INTEGER; planet : detachable PLANET]
@@ -683,6 +691,8 @@ feature -- query
 				-- No unvisited planets
 				if Result.planet = void then Result := [5, void] end
 			end
+		ensure
+			valid_error_code: Result.error_code ~ -1 or Result.error_code ~ 2 or Result.error_code ~ 3 or Result.error_code ~ 4 or Result.error_code ~ 5
 		end
 
 	print_description (is_test : BOOLEAN) : STRING
