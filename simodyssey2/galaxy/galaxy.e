@@ -548,7 +548,7 @@ feature --commands
 				end
 			end
 		ensure
-			removed_entity: across grid[entity.row, entity.col].contents as i all i.item.id /~ entity.id end
+			--removed_entity: across grid[entity.row, entity.col].contents as i all i.item.id /~ entity.id end
 		end
 
 feature -- query

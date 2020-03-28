@@ -1,1 +1,9 @@
 -- test fuel exhaustion going into a blackhole
+test(3,5,7,15,30)
+move(S)
+move(E)
+move(SE)
+play
+move(S)
+move(E)
+move(SE)

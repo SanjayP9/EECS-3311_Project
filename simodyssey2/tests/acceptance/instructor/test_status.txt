@@ -5,7 +5,7 @@ status
 move(N)
 status
 abort
-test(100)
+test(3,5,7,15,30)
 move(NE)
 status
 abort

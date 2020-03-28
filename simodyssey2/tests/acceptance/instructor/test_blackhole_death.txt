@@ -1,11 +1,9 @@
 -- test for black hole death msg
-test(30)
-move(S)
-move(S)
-move(E)
-move(E)
+test(3,5,7,15,30)
+move(SE)
+move(SE)
+move(SE)
 play
-move(S)
-move(S)
-move(E)
-move(E)
+move(SE)
+move(SE)
+move(SE)

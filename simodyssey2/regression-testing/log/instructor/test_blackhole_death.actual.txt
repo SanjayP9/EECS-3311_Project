@@ -1,2 +1,269 @@
-Type Error: specification of command executions is not type-correct
-test(30) does not conform to declaration test(a_threshold: THRESHOLD = 1 .. 101 ; j_threshold: THRESHOLD = 1 .. 101 ; m_threshold: THRESHOLD = 1 .. 101 ; b_threshold: THRESHOLD = 1 .. 101 ; p_threshold: THRESHOLD = 1 .. 101)
+  state:0.0, ok
+  Welcome! Try test(3,5,7,15,30)
+->test(3,5,7,15,30)
+  state:1.0, mode:test, ok
+  Movement:none
+  Sectors:
+    [1,1]->[0,E],-,-,-
+    [1,2]->[-8,*],-,-,-
+    [1,3]->[1,P],-,-,-
+    [1,4]->-,-,-,-
+    [1,5]->[2,P],[3,P],-,-
+    [2,1]->-,-,-,-
+    [2,2]->-,-,-,-
+    [2,3]->[-5,W],-,-,-
+    [2,4]->-,-,-,-
+    [2,5]->[4,P],-,-,-
+    [3,1]->[5,M],[-6,Y],-,-
+    [3,2]->-,-,-,-
+    [3,3]->[-1,O],-,-,-
+    [3,4]->[6,P],[-11,W],-,-
+    [3,5]->-,-,-,-
+    [4,1]->[-2,W],-,-,-
+    [4,2]->[7,M],[-7,*],-,-
+    [4,3]->[8,P],-,-,-
+    [4,4]->[9,P],[-4,*],-,-
+    [4,5]->-,-,-,-
+    [5,1]->[10,B],[-3,W],-,-
+    [5,2]->-,-,-,-
+    [5,3]->[-10,*],-,-,-
+    [5,4]->-,-,-,-
+    [5,5]->[11,P],[-9,W],-,-
+  Descriptions:
+    [-11,W]->
+    [-10,*]->Luminosity:5
+    [-9,W]->
+    [-8,*]->Luminosity:5
+    [-7,*]->Luminosity:5
+    [-6,Y]->Luminosity:2
+    [-5,W]->
+    [-4,*]->Luminosity:5
+    [-3,W]->
+    [-2,W]->
+    [-1,O]->
+    [0,E]->fuel:3/3, life:3/3, landed?:F
+    [1,P]->attached?:F, support_life?:F, visited?:F, turns_left:2
+    [2,P]->attached?:F, support_life?:F, visited?:F, turns_left:2
+    [3,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [4,P]->attached?:F, support_life?:F, visited?:F, turns_left:2
+    [5,M]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:1
+    [6,P]->attached?:F, support_life?:F, visited?:F, turns_left:2
+    [7,M]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:2
+    [8,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [9,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [10,B]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:1
+    [11,P]->attached?:F, support_life?:F, visited?:F, turns_left:2
+  Deaths This Turn:none
+    (1:1)  (1:2)  (1:3)  (1:4)  (1:5)  
+    E---   *---   P---   ----   PP--   
+    (2:1)  (2:2)  (2:3)  (2:4)  (2:5)  
+    ----   ----   W---   ----   P---   
+    (3:1)  (3:2)  (3:3)  (3:4)  (3:5)  
+    MY--   ----   O---   PW--   ----   
+    (4:1)  (4:2)  (4:3)  (4:4)  (4:5)  
+    W---   M*--   P---   P*--   ----   
+    (5:1)  (5:2)  (5:3)  (5:4)  (5:5)  
+    BW--   ----   *---   ----   PW--   
+->move(SE)
+  state:2.0, mode:test, ok
+  Movement:
+    [0,E]:[1,1,1]->[2,2,1]
+    [3,P]:[1,5,2]->[5,4,1]
+    [8,P]:[4,3,1]->[3,2,1]
+  Sectors:
+    [1,1]->-,-,-,-
+    [1,2]->[-8,*],-,-,-
+    [1,3]->[1,P],-,-,-
+    [1,4]->-,-,-,-
+    [1,5]->[2,P],-,-,-
+    [2,1]->-,-,-,-
+    [2,2]->[0,E],-,-,-
+    [2,3]->[-5,W],-,-,-
+    [2,4]->-,-,-,-
+    [2,5]->[4,P],-,-,-
+    [3,1]->[5,M],[-6,Y],-,-
+    [3,2]->[8,P],-,-,-
+    [3,3]->[-1,O],-,-,-
+    [3,4]->[6,P],[-11,W],-,-
+    [3,5]->-,-,-,-
+    [4,1]->[-2,W],-,-,-
+    [4,2]->[7,M],[-7,*],-,-
+    [4,3]->-,-,-,-
+    [4,4]->[9,P],[-4,*],-,-
+    [4,5]->-,-,-,-
+    [5,1]->[10,B],[-3,W],-,-
+    [5,2]->-,-,-,-
+    [5,3]->[-10,*],-,-,-
+    [5,4]->[3,P],-,-,-
+    [5,5]->[11,P],[-9,W],-,-
+  Descriptions:
+    [-11,W]->
+    [-10,*]->Luminosity:5
+    [-9,W]->
+    [-8,*]->Luminosity:5
+    [-7,*]->Luminosity:5
+    [-6,Y]->Luminosity:2
+    [-5,W]->
+    [-4,*]->Luminosity:5
+    [-3,W]->
+    [-2,W]->
+    [-1,O]->
+    [0,E]->fuel:2/3, life:3/3, landed?:F
+    [1,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [2,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [3,P]->attached?:F, support_life?:F, visited?:F, turns_left:2
+    [4,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [5,M]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:0
+    [6,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [7,M]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:1
+    [8,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [9,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [10,B]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:0
+    [11,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+  Deaths This Turn:none
+    (1:1)  (1:2)  (1:3)  (1:4)  (1:5)  
+    ----   *---   P---   ----   P---   
+    (2:1)  (2:2)  (2:3)  (2:4)  (2:5)  
+    ----   E---   W---   ----   P---   
+    (3:1)  (3:2)  (3:3)  (3:4)  (3:5)  
+    MY--   P---   O---   PW--   ----   
+    (4:1)  (4:2)  (4:3)  (4:4)  (4:5)  
+    W---   M*--   ----   P*--   ----   
+    (5:1)  (5:2)  (5:3)  (5:4)  (5:5)  
+    BW--   ----   *---   P---   PW--   
+->move(SE)
+  state:3.0, mode:test, ok
+  Explorer got devoured by blackhole (id: -1) at Sector:3:3
+  The game has ended. You can start a new game.
+  Movement:
+    [0,E]:[2,2,1]->[3,3,2]
+    [5,M]:[3,1,1]->[3,5,1]
+    [8,P]:[3,2,1]->[2,1,1]
+    [10,B]:[5,1,1]->[5,2,1]
+  Sectors:
+    [1,1]->-,-,-,-
+    [1,2]->[-8,*],-,-,-
+    [1,3]->[1,P],-,-,-
+    [1,4]->-,-,-,-
+    [1,5]->[2,P],-,-,-
+    [2,1]->[8,P],-,-,-
+    [2,2]->-,-,-,-
+    [2,3]->[-5,W],-,-,-
+    [2,4]->-,-,-,-
+    [2,5]->[4,P],-,-,-
+    [3,1]->-,[-6,Y],-,-
+    [3,2]->-,-,-,-
+    [3,3]->[-1,O],-,-,-
+    [3,4]->[6,P],[-11,W],-,-
+    [3,5]->[5,M],-,-,-
+    [4,1]->[-2,W],-,-,-
+    [4,2]->[7,M],[-7,*],-,-
+    [4,3]->-,-,-,-
+    [4,4]->[9,P],[-4,*],-,-
+    [4,5]->-,-,-,-
+    [5,1]->-,[-3,W],-,-
+    [5,2]->[10,B],-,-,-
+    [5,3]->[-10,*],-,-,-
+    [5,4]->[3,P],-,-,-
+    [5,5]->[11,P],[-9,W],-,-
+  Descriptions:
+    [-11,W]->
+    [-10,*]->Luminosity:5
+    [-9,W]->
+    [-8,*]->Luminosity:5
+    [-7,*]->Luminosity:5
+    [-6,Y]->Luminosity:2
+    [-5,W]->
+    [-4,*]->Luminosity:5
+    [-3,W]->
+    [-2,W]->
+    [-1,O]->
+    [1,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [2,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [3,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [4,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [5,M]->fuel:2/3, actions_left_until_reproduction:0/1, turns_left:2
+    [6,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+    [7,M]->fuel:3/3, actions_left_until_reproduction:1/1, turns_left:0
+    [8,P]->attached?:F, support_life?:F, visited?:F, turns_left:1
+    [9,P]->attached?:T, support_life?:F, visited?:F, turns_left:N/A
+    [10,B]->fuel:3/3, actions_left_until_reproduction:0/1, turns_left:0
+    [11,P]->attached?:F, support_life?:F, visited?:F, turns_left:0
+  Deaths This Turn:
+    [0,E]->fuel:1/3, life:0/3, landed?:F,
+      Explorer got devoured by blackhole (id: -1) at Sector:3:3
+    (1:1)  (1:2)  (1:3)  (1:4)  (1:5)  
+    ----   *---   P---   ----   P---   
+    (2:1)  (2:2)  (2:3)  (2:4)  (2:5)  
+    P---   ----   W---   ----   P---   
+    (3:1)  (3:2)  (3:3)  (3:4)  (3:5)  
+    -Y--   ----   O---   PW--   M---   
+    (4:1)  (4:2)  (4:3)  (4:4)  (4:5)  
+    W---   M*--   ----   P*--   ----   
+    (5:1)  (5:2)  (5:3)  (5:4)  (5:5)  
+    -W--   B---   *---   P---   PW--   
+  Explorer got devoured by blackhole (id: -1) at Sector:3:3
+  The game has ended. You can start a new game.
+->move(SE)
+  state:3.1, error
+  Negative on that request:no mission in progress.
+->play
+  state:4.0, mode:play, ok
+  Movement:none
+    (1:1)  (1:2)  (1:3)  (1:4)  (1:5)  
+    EBPW   M*--   Y---   ----   *---   
+    (2:1)  (2:2)  (2:3)  (2:4)  (2:5)  
+    P---   *---   AY--   B---   ----   
+    (3:1)  (3:2)  (3:3)  (3:4)  (3:5)  
+    P---   P---   O---   Y---   W---   
+    (4:1)  (4:2)  (4:3)  (4:4)  (4:5)  
+    ----   B---   ----   ----   P---   
+    (5:1)  (5:2)  (5:3)  (5:4)  (5:5)  
+    P---   Y---   P---   *---   ----   
+->move(SE)
+  state:5.0, mode:play, ok
+  Movement:
+    [0,E]:[1,1,1]->[2,2,2]
+    [1,B]:[1,1,2]->[2,3,3]
+    [3,M]:[1,2,1]->[5,2,2]
+    [5,A]:[2,3,1]->[2,4,2]
+      destroyed [6,B] at [2,4,1]
+    [10,P]:[4,5,1]->[5,1,2]
+    [11,P]:[5,1,1]->[4,1,1]
+    (1:1)  (1:2)  (1:3)  (1:4)  (1:5)  
+    --PW   -*--   Y---   ----   *---   
+    (2:1)  (2:2)  (2:3)  (2:4)  (2:5)  
+    P---   *E--   -YB-   -A--   ----   
+    (3:1)  (3:2)  (3:3)  (3:4)  (3:5)  
+    P---   P---   O---   Y---   W---   
+    (4:1)  (4:2)  (4:3)  (4:4)  (4:5)  
+    P---   B---   ----   ----   ----   
+    (5:1)  (5:2)  (5:3)  (5:4)  (5:5)  
+    -P--   YM--   P---   *---   ----   
+->move(SE)
+  state:6.0, mode:play, ok
+  Explorer got devoured by blackhole (id: -1) at Sector:3:3
+  The game has ended. You can start a new game.
+  Movement:
+    [0,E]:[2,2,2]->[3,3,2]
+    [1,B]:[2,3,3]->[1,3,2]
+      reproduced [13,B] at [1,3,3]
+    [3,M]:[5,2,2]->[4,3,1]
+      reproduced [14,M] at [4,3,2]
+    [4,P]:[2,1,1]->[2,2,2]
+    [7,P]:[3,1,1]->[2,1,1]
+    [9,B]:[4,2,1]->[5,2,2]
+    [12,P]:[5,3,1]->[1,3,4]
+    (1:1)  (1:2)  (1:3)  (1:4)  (1:5)  
+    --PW   -*--   YBBP   ----   *---   
+    (2:1)  (2:2)  (2:3)  (2:4)  (2:5)  
+    P---   *P--   -Y--   -A--   ----   
+    (3:1)  (3:2)  (3:3)  (3:4)  (3:5)  
+    ----   P---   O---   Y---   W---   
+    (4:1)  (4:2)  (4:3)  (4:4)  (4:5)  
+    P---   ----   MM--   ----   ----   
+    (5:1)  (5:2)  (5:3)  (5:4)  (5:5)  
+    -P--   YB--   ----   *---   ----   
+->move(SE)
+  state:6.1, error
+  Negative on that request:no mission in progress.
