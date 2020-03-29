@@ -23,6 +23,8 @@ feature
 			col := a_col
 			create entity_type.make('W')
 			movable := false
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ a_id
 		end
 end
 

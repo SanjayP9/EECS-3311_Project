@@ -18,6 +18,8 @@ feature {NONE}
 		do
 			row := coord.row
 			col := coord.col
+		ensure
+			coords_set_check : row ~ coord.row and col ~ coord.col
 		end
 
 feature --attributes

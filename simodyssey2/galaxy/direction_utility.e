@@ -59,6 +59,8 @@ feature -- queries
 		end
 
 	num_dir (int : INTEGER) : COORDINATE
+		require
+			valid_direction_int_check: int >= 1 and int <= 8
 		do
 			inspect int
 			when 1 then -- NORTH
@@ -78,6 +80,8 @@ feature -- queries
 			when 8 then -- NORTH-WEST
 				Result := NW
 			end
+		ensure
+			valid_row_col_values: Result.col >= -1 and Result.col <= 1 and Result.row >= -1 and Result.row <= 1
 		end
 
 	-- Constricts a coordinate to the bounds of the grid

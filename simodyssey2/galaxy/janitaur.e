@@ -30,6 +30,8 @@ feature
 			load := 0
 			max_load := 2
 			reproduction_turns := 2
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ a_id and quadrant ~ a_quadrant
 		end
 
 feature -- attributes

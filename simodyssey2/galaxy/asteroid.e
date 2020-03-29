@@ -26,6 +26,8 @@ feature
 			create entity_type.make ('A')
 			id := a_id
 			movable := true
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ a_id and quadrant ~ a_quadrant
 		end
 
 feature -- queries

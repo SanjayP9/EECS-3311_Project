@@ -56,6 +56,8 @@ feature -- commands
 	decrement_life
 		do
 			life := life - 1
+		ensure
+			life_decrement: old life ~ life + 1
 		end
 
 	perish (a_death_code : INTEGER; entity : detachable ENTITY)

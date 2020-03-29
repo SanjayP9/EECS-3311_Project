@@ -37,6 +37,8 @@ feature
 			max_fuel := 3
 			death_code := 0
 			movable := true
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ 0 and quadrant ~ a_quadrant
 		end
 
 feature -- command

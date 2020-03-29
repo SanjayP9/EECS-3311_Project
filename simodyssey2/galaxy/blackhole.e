@@ -21,6 +21,8 @@ feature
 			create entity_type.make('O')
 			id := -1
 			movable := false
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col
 		end
 
 invariant

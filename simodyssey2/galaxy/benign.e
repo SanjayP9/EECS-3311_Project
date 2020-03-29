@@ -28,6 +28,8 @@ feature
 			fuel := 3
 			max_fuel := 3
 			reproduction_turns := 1
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ a_id and quadrant ~ a_quadrant
 		end
 
 feature -- queries

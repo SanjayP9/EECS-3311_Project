@@ -27,6 +27,8 @@ feature
 			col := a_col
 			create entity_type.make('Y')
 			luminosity := 2
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ a_id
 		end
 
 	make_blue_giant (a_row, a_col, a_id : INTEGER)
@@ -38,7 +40,10 @@ feature
 			col := a_col
 			create entity_type.make('*')
 			luminosity := 5
+		ensure
+			coords_set_check : row ~ a_row and col ~ a_col and id ~ a_id
 		end
 
-
+invariant
+	luminosity ~ 2 or luminosity ~ 5
 end

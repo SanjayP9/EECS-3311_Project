@@ -156,6 +156,9 @@ feature --commands
 			when 3 then
 				Result := create {WORMHOLE}.make (a_row, a_col, stationary_id)
 			end
+		ensure
+			verify_stationary_entity: Result.entity_type.item ~ 'Y' or Result.entity_type.item ~ '*' or Result.entity_type.item ~ 'W'
+			verify_correct_row_col: Result.coord.row ~ a_row and Result.coord.col ~ a_col
 		end
 
 	move (obj : ENTITY; coord : COORDINATE) : BOOLEAN
@@ -218,6 +221,9 @@ feature --commands
 
 				Result := true
 			end
+		ensure
+			has_moved: Result ~ true implies not old grid[coord.row,coord.col].is_full and (obj.row ~ coord.row and obj.col ~ coord.col)
+			has_not_moved: Result ~ false implies old grid[coord.row,coord.col].is_full and (old obj.row ~ obj.row and old obj.col ~ obj.col and old obj.quadrant ~ obj.quadrant)
 		end
 
 	-- Uses a wormhole
@@ -434,7 +440,7 @@ feature --commands
 					mov_ent.decrement_reproduction
 				end
 			end
-
+		ensure
 		end
 
 	behave (mov_ent : MOVABLE_ENTITY) : INTEGER
@@ -547,8 +553,6 @@ feature --commands
 					end
 				end
 			end
-		ensure
-			--removed_entity: across grid[entity.row, entity.col].contents as i all i.item.id /~ entity.id end
 		end
 
 feature -- query
@@ -608,6 +612,7 @@ feature -- query
 			end
 		ensure
 			array_size_check: array.count ~ Result.count
+			array_content_check: across array as k all Result.has(k.item) end
 		end
 
 	get_movement_sorted (array : ARRAY[TUPLE[ent : ENTITY; old_loc : COORDINATE; old_quad : INTEGER; new_quad : INTEGER]]) :
@@ -635,6 +640,7 @@ feature -- query
 			end
 		ensure
 			array_size_check: array.count ~ Result.count
+			array_content_check: across array as k all Result.has(k.item) end
 		end
 
 	get_reproduced_sorted (array : ARRAY[TUPLE[parent : ENTITY; child : ENTITY]]) :
@@ -662,6 +668,7 @@ feature -- query
 			end
 		ensure
 			array_size_check: array.count ~ Result.count
+			array_content_check: across array as k all Result.has(k.item) end
 		end
 
 	is_valid_landing : TUPLE[error_code : INTEGER; planet : detachable PLANET]
