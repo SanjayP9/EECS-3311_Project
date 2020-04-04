@@ -39,11 +39,6 @@ feature -- model attributes
 	error_msg : STRING
 
 	shared_info_access : SHARED_INFORMATION_ACCESS
-	shared_info : SHARED_INFORMATION
-		attribute
-			Result := shared_info_access.shared_info
-		end
-
 	direction_helper : DIRECTION_UTILITY
 
 feature -- model operations
@@ -66,7 +61,7 @@ feature -- model operations
 					curr_sub_state := 0
 					curr_state := curr_state + 1
 
-					shared_info.test (a_threshold, j_threshold, m_threshold, b_threshold, p_threshold)
+					shared_info_access.shared_info.test (a_threshold, j_threshold, m_threshold, b_threshold, p_threshold)
 					ingame := true
 
 					create g.make

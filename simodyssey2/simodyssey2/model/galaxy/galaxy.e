@@ -30,11 +30,6 @@ feature -- attributes
 
 	shared_info_access : SHARED_INFORMATION_ACCESS
 
-	shared_info: SHARED_INFORMATION
-		attribute
-			Result:= shared_info_access.shared_info
-		end
-
 	ship : SHIP
 
 feature {NONE}
@@ -69,18 +64,18 @@ feature --constructor
 			create ship.make(1, 1, 1)
 
 			-- create sectors
-			create grid.make_filled (create {SECTOR}.make_dummy, shared_info.number_rows, shared_info.number_columns)
+			create grid.make_filled (create {SECTOR}.make_dummy, shared_info_access.shared_info.number_rows, shared_info_access.shared_info.number_columns)
 			movable_id := 1
 			from
 				row := 1
 			until
-				row > shared_info.number_rows
+				row > shared_info_access.shared_info.number_rows
 			loop
 
 				from
 					column := 1
 				until
-					column > shared_info.number_columns
+					column > shared_info_access.shared_info.number_columns
 				loop
 					grid[row,column] := create {SECTOR}.make(row,column, ship, movable_id)
 
@@ -128,11 +123,11 @@ feature --commands
 			from
 				loop_counter := 1
 			until
-				loop_counter > shared_info.number_of_stationary_items
+				loop_counter > shared_info_access.shared_info.number_of_stationary_items
 			loop
 
-				temp_row :=  gen.rchoose (1, shared_info.number_rows)
-				temp_column := gen.rchoose (1, shared_info.number_columns)
+				temp_row :=  gen.rchoose (1, shared_info_access.shared_info.number_rows)
+				temp_column := gen.rchoose (1, shared_info_access.shared_info.number_columns)
 				check_sector := grid[temp_row,temp_column]
 				if (not check_sector.has_stationary) and (not check_sector.is_full) then
 					stationary_id := -1 - loop_counter
@@ -144,6 +139,14 @@ feature --commands
 
 	create_stationary_item (a_row, a_col, stationary_id : INTEGER) : ENTITY
 			-- this feature randomly creates one of the possible types of stationary actors
+		require
+			in_bounds :
+				a_row <= shared_info_access.shared_info.number_rows and
+				a_col <= shared_info_access.shared_info.number_columns and
+				a_row >= 1 and
+				a_col >= 1
+			negative_id :
+				stationary_id < 0
 		local
 			chance: INTEGER
 		do
@@ -162,11 +165,12 @@ feature --commands
 		end
 
 	move (obj : ENTITY; coord : COORDINATE) : BOOLEAN
+		require
+			entity_not_void : attached obj
 		local
 			index : INTEGER
 		do
 			if grid[coord.row, coord.col].is_full then
-
 				if not attached {SHIP} obj then
 					from grid[obj.row, obj.col].contents.start
 					until
@@ -200,20 +204,20 @@ feature --commands
 				obj.overwrite_coordinates (coord.row, coord.col)
 
 				from index := 1
-				until index > shared_info.max_capacity
+				until index > shared_info_access.shared_info.max_capacity
 				loop
 					if not grid[coord.row, coord.col].contents.valid_index (index) then
 						grid[coord.row, coord.col].contents.go_i_th (index)
 						grid[coord.row, coord.col].contents.force (obj)
 						obj.overwrite_quadrant (index)
 						moved_entities.at (moved_entities.count).new_quad := index
-						index := shared_info.max_capacity
+						index := shared_info_access.shared_info.max_capacity
 					else
 						if not attached grid[coord.row, coord.col].contents[index] then
 							grid[coord.row, coord.col].contents[index] := obj
 							obj.overwrite_quadrant (index)
 							moved_entities.at (moved_entities.count).new_quad := index
-							index := shared_info.max_capacity
+							index := shared_info_access.shared_info.max_capacity
 						end
 					end
 					index := index + 1
@@ -223,11 +227,13 @@ feature --commands
 			end
 		ensure
 			has_moved: Result ~ true implies not old grid[coord.row,coord.col].is_full and (obj.row ~ coord.row and obj.col ~ coord.col)
-			has_not_moved: Result ~ false implies old grid[coord.row,coord.col].is_full and (old obj.row ~ obj.row and old obj.col ~ obj.col and old obj.quadrant ~ obj.quadrant)
+			has_not_moved: Result ~ false implies (old obj.row ~ obj.row and old obj.col ~ obj.col and old obj.quadrant ~ obj.quadrant)
 		end
 
 	-- Uses a wormhole
 	wormhole (entity : ENTITY) : INTEGER
+		require
+			entity_not_void : attached entity
 		local
 			temp_row, temp_col : INTEGER
 			added : BOOLEAN
@@ -375,6 +381,8 @@ feature --commands
 		end
 
 	reproduce (mov_ent : MOVABLE_ENTITY)
+		require
+			entity_not_void : attached mov_ent
 		local
 			index : INTEGER
 		do
@@ -383,7 +391,7 @@ feature --commands
 				if not grid[mov_ent.row, mov_ent.col].is_full and mov_ent.reproduction_turns ~ 0 then
 					from
 						index := 1
-					until index > shared_info.max_capacity
+					until index > shared_info_access.shared_info.max_capacity
 					loop
 						if not grid[mov_ent.row, mov_ent.col].contents.valid_index (index) then
 							grid[mov_ent.row, mov_ent.col].contents.go_i_th (index)
@@ -408,7 +416,7 @@ feature --commands
 								ent.override_turns (gen.rchoose (0, 2))
 							end
 
-							index := shared_info.max_capacity
+							index := shared_info_access.shared_info.max_capacity
 						elseif not attached grid[mov_ent.row, mov_ent.col].contents[index] then
 							grid[mov_ent.row, mov_ent.col].contents.go_i_th (index)
 							if attached {MALEVOLENT} mov_ent as malevolent then
@@ -432,7 +440,7 @@ feature --commands
 								ent.override_turns (gen.rchoose (0, 2))
 							end
 
-							index := shared_info.max_capacity
+							index := shared_info_access.shared_info.max_capacity
 						end
 						index := index + 1
 					end
@@ -440,10 +448,11 @@ feature --commands
 					mov_ent.decrement_reproduction
 				end
 			end
-		ensure
 		end
 
 	behave (mov_ent : MOVABLE_ENTITY) : INTEGER
+		require
+			entity_not_void : attached mov_ent
 		local
 			sorted : ARRAYED_LIST[ENTITY]
 			num : INTEGER
@@ -520,7 +529,6 @@ feature --commands
 						delete_entity(ship)
 						Result := 4
 					end
-
 				end
 				malevolent.override_turns (gen.rchoose (0, 2))
 			elseif attached {PLANET} mov_ent as planet then
@@ -542,8 +550,10 @@ feature --commands
 		end
 
 	delete_entity (entity : ENTITY)
+		require
+			entity_not_void : attached entity
 		do
-			across 1 |..| shared_info.max_capacity as j loop
+			across 1 |..| shared_info_access.shared_info.max_capacity as j loop
 				if grid[entity.row, entity.col].contents.valid_index (j.item) then
 					if attached grid[entity.row, entity.col].contents[j.item] as quadrant then
 						if quadrant.id ~ entity.id then
@@ -553,9 +563,15 @@ feature --commands
 					end
 				end
 			end
+		ensure
+			deleted :
+				across grid[old entity.row, old entity.col].contents as quadrant all
+					attached quadrant.item as q implies
+						q.id /~ old entity.id
+				end
 		end
 
-feature -- query
+feature {NONE} -- queries
 
 	-- returns all entities in the galaxy
 	entities : ARRAY[ENTITY]
@@ -567,12 +583,12 @@ feature -- query
 			from
 				row := 1
 			until
-				row > shared_info.number_rows
+				row > shared_info_access.shared_info.number_rows
 			loop
 				from
 					col := 1
 				until
-					col > shared_info.number_columns
+					col > shared_info_access.shared_info.number_columns
 				loop
 					across grid[row, col].contents as i loop
 						if attached i.item as item then
@@ -670,6 +686,8 @@ feature -- query
 			array_size_check: array.count ~ Result.count
 			array_content_check: across array as k all Result.has(k.item) end
 		end
+
+feature {GALAXY_MODEL}
 
 	is_valid_landing : TUPLE[error_code : INTEGER; planet : detachable PLANET]
 		do
@@ -805,12 +823,12 @@ feature -- query
 				from
 					row := 1
 				until
-					row > shared_info.number_rows
+					row > shared_info_access.shared_info.number_rows
 				loop
 					from
 						col := 1
 					until
-						col > shared_info.number_columns
+						col > shared_info_access.shared_info.number_columns
 					loop
 						Result.append("%N    [")
 						Result.append(row.out)
@@ -926,14 +944,14 @@ feature -- query
 		temp_component: ENTITY
 	do
 		create Result.make_empty
-		create string1.make(7*shared_info.number_rows)
-		create string2.make(7*shared_info.number_columns)
+		create string1.make(7*shared_info_access.shared_info.number_rows)
+		create string2.make(7*shared_info_access.shared_info.number_columns)
 		string1.append("%N")
 
 		from
 			row_counter := 1
 		until
-			row_counter > shared_info.number_rows
+			row_counter > shared_info_access.shared_info.number_rows
 		loop
 			string1.append("    ")
 			string2.append("    ")
@@ -941,7 +959,7 @@ feature -- query
 			from
 				column_counter := 1
 			until
-				column_counter > shared_info.number_columns
+				column_counter > shared_info_access.shared_info.number_columns
 			loop
 				temp_sector:= grid[row_counter, column_counter]
 			    string1.append("(")
@@ -967,7 +985,7 @@ feature -- query
 				end -- loop
 
 				from
-				until (shared_info.max_capacity - printed_symbols_counter)=0
+				until (shared_info_access.shared_info.max_capacity - printed_symbols_counter)=0
 				loop
 						string2.append("-")
 						printed_symbols_counter:=printed_symbols_counter+1
@@ -977,7 +995,7 @@ feature -- query
 				column_counter := column_counter + 1
 			end -- loop
 			string1.append("%N")
-			if not (row_counter = shared_info.number_rows) then
+			if not (row_counter = shared_info_access.shared_info.number_rows) then
 				string2.append("%N")
 			end
 			Result.append (string1.twin)

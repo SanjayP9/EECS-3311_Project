@@ -12,12 +12,6 @@ create
 
 feature -- attributes
 	shared_info_access : SHARED_INFORMATION_ACCESS
-
-	shared_info: SHARED_INFORMATION
-		attribute
-			Result:= shared_info_access.shared_info
-		end
-
 	gen: RANDOM_GENERATOR_ACCESS
 
 	contents: ARRAYED_LIST [detachable ENTITY] --holds 4 quadrants
@@ -30,12 +24,12 @@ feature -- constructor
 	make(row_input: INTEGER; column_input: INTEGER; a_explorer: SHIP; movable_id: INTEGER)
 		--initialization
 		require
-			valid_row: (row_input >= 1) and (row_input <= shared_info.number_rows)
-			valid_column: (column_input >= 1) and (column_input <= shared_info.number_columns)
+			valid_row: (row_input >= 1) and (row_input <= shared_info_access.shared_info.number_rows)
+			valid_column: (column_input >= 1) and (column_input <= shared_info_access.shared_info.number_columns)
 		do
 			row := row_input
 			column := column_input
-			create contents.make (shared_info.max_capacity) -- Each sector should have 4 quadrants
+			create contents.make (shared_info_access.shared_info.max_capacity) -- Each sector should have 4 quadrants
 			contents.compare_objects
 			if (row = 3) and (column = 3) then
 				put (create {BLACKHOLE}.make (3, 3)) -- If this is the sector in the middle of the board, place a black hole
@@ -51,7 +45,7 @@ feature -- commands
 	make_dummy
 		--initialization without creating entities in quadrants
 		do
-			create contents.make (shared_info.max_capacity)
+			create contents.make (shared_info_access.shared_info.max_capacity)
 			contents.compare_objects
 		end
 
@@ -67,7 +61,7 @@ feature -- commands
 			m_id : INTEGER
 		do
 			m_id := movable_id
-			number_items := gen.rchoose (1, shared_info.max_capacity-1)  -- MUST decrease max_capacity by 1 to leave space for Explorer (so a max of 3)
+			number_items := gen.rchoose (1, shared_info_access.shared_info.max_capacity-1)  -- MUST decrease max_capacity by 1 to leave space for Explorer (so a max of 3)
 			from
 				loop_counter := 1
 			until
@@ -76,15 +70,15 @@ feature -- commands
 				threshold := gen.rchoose (1, 100) -- each iteration, generate a new value to compare against the threshold values provided by `test` or `play`
 
 
-				if threshold < shared_info.asteroid_threshold then
+				if threshold < shared_info_access.shared_info.asteroid_threshold then
 					component := create {ASTEROID}.make (row, column, m_id, loop_counter)
-				elseif threshold < shared_info.janitaur_threshold then
+				elseif threshold < shared_info_access.shared_info.janitaur_threshold then
 					component := create {JANITAUR}.make (row, column, m_id, loop_counter)
-				elseif (threshold < shared_info.malevolent_threshold) then
+				elseif (threshold < shared_info_access.shared_info.malevolent_threshold) then
 					component := create {MALEVOLENT}.make (row, column, m_id, loop_counter)
-				elseif (threshold < shared_info.benign_threshold) then
+				elseif (threshold < shared_info_access.shared_info.benign_threshold) then
 					component := create {BENIGN}.make (row, column, m_id, loop_counter)
-				elseif threshold < shared_info.planet_threshold then
+				elseif threshold < shared_info_access.shared_info.planet_threshold then
 					component := create {PLANET}.make(row, column, m_id, loop_counter)
 				else
 					m_id := m_id - 1
@@ -162,7 +156,7 @@ feature -- Queries
 		-- Prints sector contents
 		do
 			Result := ""
-			across 1 |..| shared_info.max_capacity as i
+			across 1 |..| shared_info_access.shared_info.max_capacity as i
 			loop
 				if contents.valid_index (i.item) then
 					if attached contents[i.item] as ent then
@@ -176,7 +170,7 @@ feature -- Queries
 					Result.append ("-")
 				end
 
-				if i.item /~ shared_info.max_capacity then
+				if i.item /~ shared_info_access.shared_info.max_capacity then
 					Result.append (",")
 				end
 			end
@@ -189,7 +183,7 @@ feature -- Queries
 			occupant: ENTITY
 			empty_space_found: BOOLEAN
 		do
-			if contents.count < shared_info.max_capacity then
+			if contents.count < shared_info_access.shared_info.max_capacity then
 				empty_space_found := TRUE
 			end
 			from
@@ -204,7 +198,7 @@ feature -- Queries
 				loop_counter := loop_counter + 1
 			end
 
-			Result := contents.count = shared_info.max_capacity and then not empty_space_found
+			Result := contents.count = shared_info_access.shared_info.max_capacity and then not empty_space_found
 		end
 
 	has_stationary: BOOLEAN
@@ -280,6 +274,6 @@ feature -- Queries
 		end
 
 invariant
-	max_contents : contents.count <= shared_info.max_capacity
+	max_contents : contents.count <= shared_info_access.shared_info.max_capacity
 
 end
